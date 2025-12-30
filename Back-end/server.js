@@ -1,10 +1,11 @@
 const express = require("express");
 const db = require("./db");
+const cors = require("cors");
 const authRoutes = require("./routes/auth");
 
 const app = express(); 
 app.use(express.json()); 
-
+app.use(cors()); 
 
 app.use("/api/auth", authRoutes); // /api/auth/register and /api/auth/login
 

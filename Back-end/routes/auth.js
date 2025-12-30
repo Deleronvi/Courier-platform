@@ -13,6 +13,9 @@ router.post("/register", async (req, res) => {
 
   if (!email || !password || !confirmPassword || !role)
     return res.status(400).json({ msg: "All fields required" });
+   
+  if (password.length < 8)
+  return res.status(400).json({ msg: "Password must be at least 8 characters" });
 
   if (password !== confirmPassword)
     return res.status(400).json({ msg: "Passwords do not match" });

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Courier Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-green-700 text-white p-6">
+<h2 class="text-xl font-bold mb-6">
+  Courier Dashboard<br>
+  <span class="text-sm font-normal" id="userEmail"></span>
+</h2>
+
+    <ul class="space-y-4">
+      <li class="font-semibold">My Active Jobs (0)</li>
+      <li>
+        <button onclick="logout()" class="text-red-300">
+          Logout
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-8">
+
+    <h1 class="text-2xl font-bold mb-6">
+      Available Requests (1)
+    </h1>
+
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <p class="font-semibold">CTF-5XN664YRI</p>
+      <p class="text-gray-500">Requested</p>
+      <p><strong>From:</strong> --</p>
+      <p><strong>To:</strong> --</p>
+      <p class="text-gray-500">No Courier Assigned</p>
+      <p class="text-sm text-gray-400">Business: User-16413</p>
+
+      <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded">
+        Accept Job
+      </button>
+    </div>
+
+    <p class="text-gray-500">
+      No jobs currently accepted.
+    </p>
+
+  </main>
+</div>
+
+<script>
+document.getElementById("userEmail").textContent =
+  localStorage.getItem("email");
+      
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
