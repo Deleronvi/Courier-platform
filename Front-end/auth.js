@@ -1,4 +1,4 @@
-alert("AUTH.JS LOADED FROM THIS FILE");
+
 
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");

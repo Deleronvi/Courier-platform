@@ -46,13 +46,17 @@
         <p class="text-gray-500">Delivered</p>
         <p class="text-2xl font-bold">--</p>
       </div>
+      <p class="text-2xl font-bold" id="transit">0</p>
+<p class="text-2xl font-bold" id="awaiting">0</p>
+<p class="text-2xl font-bold" id="delivered">0</p>
+
     </div>
 
     <!-- NEW SHIPMENT -->
     <div class="bg-white p-6 rounded shadow mb-8">
       <h2 class="text-lg font-semibold mb-4">New Shipment Request</h2>
 
-      <form class="space-y-4">
+     <form id="shipmentForm" class="space-y-4">
         <input class="w-full border p-2 rounded" placeholder="Pickup Address" />
         <input class="w-full border p-2 rounded" placeholder="Drop-off Address" />
         <input class="w-full border p-2 rounded" placeholder="Receiver Name / Contact" />
@@ -65,28 +69,16 @@
 
     <!-- MY SHIPMENTS -->
     <div class="bg-white p-6 rounded shadow">
-      <h2 class="text-lg font-semibold mb-4">My Shipments</h2>
+  <h2 class="text-lg font-semibold mb-4">My Shipments</h2>
+  <div id="shipmentsList"></div>
+</div>
 
-      <div class="border p-4 rounded">
-        <p><strong>From:</strong> --</p>
-        <p><strong>To:</strong> --</p>
-        <p class="text-gray-500">No Courier Assigned</p>
-        <button class="text-red-500 mt-2">Cancel Request</button>
-      </div>
-    </div>
 
   </main>
 </div>
 
-<script>
-    document.getElementById("userEmail").textContent =
-  localStorage.getItem("email");
-  
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
-}
-</script>
+<script src="sender.js"></script>
+
 
 </body>
 </html>

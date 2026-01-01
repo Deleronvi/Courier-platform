@@ -27,41 +27,18 @@
   </aside>
 
   <!-- MAIN -->
-  <main class="flex-1 p-8">
+ <main class="flex-1 p-8">
+  <h1 id="availableTitle" class="text-2xl font-bold mb-6"></h1>
 
-    <h1 class="text-2xl font-bold mb-6">
-      Available Requests (1)
-    </h1>
+  <div id="availableJobs"></div>
 
-    <div class="bg-white p-6 rounded shadow mb-6">
-      <p class="font-semibold">CTF-5XN664YRI</p>
-      <p class="text-gray-500">Requested</p>
-      <p><strong>From:</strong> --</p>
-      <p><strong>To:</strong> --</p>
-      <p class="text-gray-500">No Courier Assigned</p>
-      <p class="text-sm text-gray-400">Business: User-16413</p>
+  <h2 class="text-xl font-semibold mt-10 mb-4">My Active Jobs</h2>
+  <div id="activeJobs"></div>
+</main>
 
-      <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded">
-        Accept Job
-      </button>
-    </div>
-
-    <p class="text-gray-500">
-      No jobs currently accepted.
-    </p>
-
-  </main>
 </div>
 
-<script>
-document.getElementById("userEmail").textContent =
-  localStorage.getItem("email");
-      
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
-}
-</script>
+<script src="driver.js"></script>
 
 </body>
 </html>

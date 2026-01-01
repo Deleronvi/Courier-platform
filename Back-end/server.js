@@ -21,6 +21,10 @@ app.get("/users", (req, res) => {
   });
 });
 
+const shipmentRoutes = require("./routes/shipments");
+app.use("/api/shipments", shipmentRoutes);
+
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
