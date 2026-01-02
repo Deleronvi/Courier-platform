@@ -39,7 +39,11 @@ router.post("/", auth, (req, res) => {
 /* GET SENDER SHIPMENTS */
 router.get("/mine", auth, (req, res) => {
   db.query(
-    "SELECT * FROM shipments WHERE sender_id = ? ORDER BY created_at DESC",
+    `SELECT s.*, u.email AS courier_email
+     FROM shipments s
+     LEFT JOIN users u ON s.courier_id = u.id
+     WHERE s.sender_id = ?
+     ORDER BY s.created_at DESC`,
     [req.user.id],
     (err, rows) => {
       if (err) return res.status(500).json(err);
@@ -47,6 +51,7 @@ router.get("/mine", auth, (req, res) => {
     }
   );
 });
+
 
 /* GET AVAILABLE SHIPMENTS (COURIER) */
 router.get("/available", auth, (req, res) => {
@@ -89,5 +94,45 @@ router.get("/my-jobs", auth, (req, res) => {
   );
 });
 
+router.post("/:id/cancel", auth, (req, res) => {
+  db.query(
+    `UPDATE shipments
+     SET status='cancelled'
+     WHERE id=? AND sender_id=? AND status='pending'`,
+    [req.params.id, req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Cancelled" });
+    }
+  );
+});
+
+router.post("/:id/driver-cancel", auth, (req, res) => {
+  db.query(
+    `UPDATE shipments
+     SET status='cancelled'
+     WHERE id=? AND courier_id=?`,
+    [req.params.id, req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Job cancelled" });
+    }
+  );
+});
+/* MARK SHIPMENT AS DELIVERED */
+router.post("/:id/deliver", auth, (req, res) => {
+  db.query(
+    `UPDATE shipments
+     SET status = 'delivered'
+     WHERE id = ?
+       AND courier_id = ?
+       AND status = 'in_transit'`,
+    [req.params.id, req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Shipment delivered" });
+    }
+  );
+});
 
 module.exports = router;

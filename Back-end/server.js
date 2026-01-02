@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(cors()); 
 
 app.use("/api/auth", authRoutes); // /api/auth/register and /api/auth/login
+app.use("/api/messages", require("./routes/messages"));
 
 app.get("/", (req, res) => {
   res.send("Courier Platform API running");
