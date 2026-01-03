@@ -1,5 +1,6 @@
 const token = localStorage.getItem("token");
 const email = localStorage.getItem("email");
+let hidden = JSON.parse(localStorage.getItem("hiddenShipments")) || [];
 
 if (!token) location.href = "index.html";
 
@@ -22,13 +23,22 @@ async function loadShipments() {
       transit = 0,
       delivered = 0;
 
-  data.forEach(s => {
+  data.forEach(s => { 
+    if (hidden.includes(s.id)) return;
+    
     if (s.status === "pending") awaiting++;
     if (s.status === "in_transit") transit++;
     if (s.status === "delivered") delivered++;
+    
 
     list.innerHTML += `
-      <div class="border p-4 rounded mb-4">
+      <div class="relative border p-4 rounded mb-4">
+      <button
+  onclick="hideShipment(${s.id})"
+  class="absolute top-2 right-2 text-red-600 text-lg">
+  🗑️
+</button>
+
         <p><strong>From:</strong> ${s.pickup_address}</p>
         <p><strong>To:</strong> ${s.dropoff_address}</p>
         <p>Status: ${s.status}</p>
@@ -160,6 +170,12 @@ async function cancelShipment(id) {
   loadShipments();
 }
 
+function hideShipment(id) {
+  hidden.push(id);
+  localStorage.setItem("hiddenShipments", JSON.stringify(hidden));
+  loadShipments();
+}
+ 
 /* ================================
    LOGOUT
 ================================ */
