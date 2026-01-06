@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>All Shipments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8 bg-gray-100">
+<a href="admin.html"
+   class="text-blue-600 hover:underline text-sm mb-4 inline-block">
+  ← Back to Home Admin
+</a>
+<h2 class="text-xl font-bold mb-4">All Shipments</h2>
+
+<table class="w-full bg-white shadow rounded text-sm">
+<thead class="bg-gray-200">
+<tr>
+  <th>ID</th>
+  <th>Sender</th>
+  <th>Driver</th>
+  <th>Status</th>
+  <th>Created</th>
+  <th>Actions</th>
+</tr>
+</thead>
+<tbody id="shipments"></tbody>
+</table>
+
+<script src="admin-shipments.js"></script>
+</body>
+</html>

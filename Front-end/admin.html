@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body class="bg-gray-100">
 
@@ -14,9 +15,10 @@
     <h2 class="text-xl font-bold mb-6">Admin Panel</h2>
 
     <ul class="space-y-4">
-      <li>Users</li>
-      <li>Shipments</li>
-      <li>Reports</li>
+      <li><a href="admin-users.html">Users</a></li>
+      <li><a href="admin-shipments.html">Shipments</a></li>
+
+    <li><a href="admin-reports.html">Reports</a></li>
       <li>
         <button onclick="logout()" class="text-red-400">
           Logout
@@ -32,28 +34,28 @@
     </h1>
 
     <div class="grid grid-cols-3 gap-6">
-      <div class="bg-white p-6 rounded shadow">
-        <p>Total Users</p>
-        <p class="text-2xl font-bold">--</p>
-      </div>
-      <div class="bg-white p-6 rounded shadow">
-        <p>Total Shipments</p>
-        <p class="text-2xl font-bold">--</p>
-      </div>
-      <div class="bg-white p-6 rounded shadow">
-        <p>Active Couriers</p>
-        <p class="text-2xl font-bold">--</p>
-      </div>
-    </div>
+  <div class="bg-white p-6 rounded shadow">
+    <p>Total Users</p>
+    <p class="text-2xl font-bold" id="totalUsers">0</p>
+  </div>
+
+  <div class="bg-white p-6 rounded shadow">
+    <p>Total Shipments</p>
+    <p class="text-2xl font-bold" id="totalShipments">0</p>
+  </div>
+
+  <div class="bg-white p-6 rounded shadow">
+    <p>Active Couriers</p>
+    <p class="text-2xl font-bold" id="activeCouriers">0</p>
+  </div>
+</div>
+
+
   </main>
 </div>
 
-<script>
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
-}
-</script>
+<script src="admin.js"></script>
+
 
 </body>
 </html>

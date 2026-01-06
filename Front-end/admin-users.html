@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Users</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8 bg-gray-100">
+<a href="admin.html"
+   class="text-blue-600 hover:underline text-sm mb-4 inline-block">
+  ← Back to Home Admin
+</a>
+<h2 class="text-xl font-bold mb-4">Users</h2>
+<table class="w-full bg-white shadow rounded">
+<thead class="bg-gray-200">
+<tr>
+  <th>Email</th><th>Role</th><th>Status</th><th>Actions</th>
+</tr>
+</thead>
+<tbody id="users"></tbody>
+</table>
+
+<script src="admin-users.js"></script>
+</body>
+</html>

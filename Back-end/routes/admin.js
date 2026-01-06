@@ -1,0 +1,123 @@
+const express = require("express");
+const db = require("../db");
+const jwt = require("jsonwebtoken");
+
+const router = express.Router();
+
+function adminAuth(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err || user.role !== "admin") return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
+/* DASHBOARD STATS */
+router.get("/stats", adminAuth, (req, res) => {
+  const stats = {};
+
+  db.query("SELECT COUNT(*) total FROM users", (e, r) => {
+    stats.users = r[0].total;
+
+    db.query("SELECT COUNT(*) total FROM shipments", (e2, r2) => {
+      stats.shipments = r2[0].total;
+
+      db.query(
+        "SELECT COUNT(*) total FROM users WHERE role = 'courier'",
+        (e3, r3) => {
+          stats.couriers = r3[0].total;
+          res.json(stats);
+        }
+      );
+    });
+  });
+});
+
+/* ALL USERS */
+router.get("/users", adminAuth, (req, res) => {
+  db.query(
+    "SELECT id, email, role FROM users ORDER BY id DESC",
+    (err, rows) => res.json(rows)
+  );
+});
+
+
+/* UPDATE USER ROLE */
+router.put("/users/:id/role", adminAuth, (req, res) => {
+  const { role } = req.body;
+  db.query(
+    "UPDATE users SET role=? WHERE id=?",
+    [role, req.params.id],
+    () => res.sendStatus(200)
+  );
+});
+
+/* ENABLE / DISABLE USER */
+router.put("/users/:id/status", adminAuth, (req, res) => {
+  const { status } = req.body;
+  db.query(
+    "UPDATE users SET status=? WHERE id=?",
+    [status, req.params.id],
+    () => res.sendStatus(200)
+  );
+});
+
+/* REPORTS */
+router.get("/reports", adminAuth, (req, res) => {
+  const report = {};
+
+  db.query(
+    "SELECT status, COUNT(*) count FROM shipments GROUP BY status",
+    (e, r1) => {
+      report.byStatus = r1;
+
+      db.query(
+        "SELECT DATE(created_at) day, COUNT(*) count FROM shipments GROUP BY day",
+        (e2, r2) => {
+          report.byDay = r2;
+
+          res.json(report);
+        }
+      );
+    }
+  );
+});
+
+/* GET ALL SHIPMENTS */
+router.get("/shipments", adminAuth, (req, res) => {
+  const q = `
+    SELECT 
+      s.*,
+      sender.email AS sender_email,
+      courier.email AS courier_email
+    FROM shipments s
+    JOIN users sender ON s.sender_id = sender.id
+    LEFT JOIN users courier ON s.courier_id = courier.id
+    ORDER BY s.created_at DESC
+  `;
+  db.query(q, (err, rows) => res.json(rows));
+});
+
+
+/* FORCE CANCEL SHIPMENT */
+router.put("/shipments/:id/cancel", adminAuth, (req, res) => {
+  db.query(
+    "UPDATE shipments SET status='cancelled' WHERE id=?",
+    [req.params.id],
+    () => res.sendStatus(200)
+  );
+});
+
+/* FORCE DELIVER */
+router.put("/shipments/:id/deliver", adminAuth, (req, res) => {
+  db.query(
+    "UPDATE shipments SET status='delivered' WHERE id=?",
+    [req.params.id],
+    () => res.sendStatus(200)
+  );
+});
+
+module.exports = router;
