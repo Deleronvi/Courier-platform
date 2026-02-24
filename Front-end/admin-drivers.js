@@ -30,7 +30,7 @@ async function loadDrivers() {
       </td>
       <td>
         <button 
-          onclick="toggleStatus(${d.id}, '${d.status}')"
+          onclick="toggleStatus(${d.id}, '${d.status || "active"}')"
           class="text-sm px-3 py-1 rounded ${
             d.status === 'active'
               ? 'bg-red-100 text-red-600'
@@ -44,9 +44,10 @@ async function loadDrivers() {
 }
 
 async function toggleStatus(id, currentStatus) {
+    console.log("Clicked", id, currentStatus);
   const newStatus = currentStatus === "active" ? "blocked" : "active";
 
-  await fetch(`http://localhost:3000/api/admin/users/${id}/status`, {
+  const res = await fetch(`http://localhost:3000/api/admin/users/${id}/status`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -54,6 +55,11 @@ async function toggleStatus(id, currentStatus) {
     },
     body: JSON.stringify({ status: newStatus })
   });
+
+  if (!res.ok) {
+    alert("Failed to update status");
+    return;
+  }
 
   loadDrivers();
 }

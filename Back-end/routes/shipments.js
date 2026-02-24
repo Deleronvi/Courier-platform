@@ -10,10 +10,24 @@ function auth(req, res, next) {
   if (!header) return res.sendStatus(401);
 
   const token = header.split(" ")[1];
+
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
+
+    db.query(
+      "SELECT status FROM users WHERE id = ?",
+      [user.id],
+      (dbErr, rows) => {
+        if (dbErr || !rows.length) return res.sendStatus(403);
+
+        if (rows[0].status !== "active") {
+          return res.status(403).json({ msg: "Account blocked by admin" });
+        }
+
+        req.user = user;
+        next();
+      }
+    );
   });
 }
 

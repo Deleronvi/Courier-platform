@@ -288,7 +288,7 @@ async function loadRatings() {
   }).join("");
 
   box.innerHTML = `
-    <div class="bg-white p-4 rounded shadow">
+  <div class="bg-gray-800 text-white p-4 rounded shadow">
       <p class="text-xl font-bold mb-1">⭐ ${avg} / 5</p>
       <p class="text-sm text-gray-500 mb-3">${total} ratings</p>
       ${breakdown}

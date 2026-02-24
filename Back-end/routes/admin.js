@@ -174,22 +174,21 @@ router.get("/drivers", adminAuth, (req, res) => {
       u.email,
       u.status,
       u.is_online,
-      COUNT(CASE WHEN s.status = 'delivered' THEN 1 END) AS deliveries,
-      COUNT(CASE WHEN s.status = 'cancelled' THEN 1 END) AS cancelled
+      COUNT(DISTINCT CASE WHEN s.status = 'delivered' THEN s.id END) AS deliveries,
+      COUNT(DISTINCT CASE WHEN s.status = 'cancelled' THEN s.id END) AS cancelled,
+      IFNULL(ROUND(AVG(r.rating), 2), 0) AS avg_rating,
+      COUNT(DISTINCT r.id) AS total_ratings
     FROM users u
     LEFT JOIN shipments s ON u.id = s.courier_id
+    LEFT JOIN ratings r ON u.id = r.driver_id
     WHERE u.role = 'courier'
     GROUP BY u.id
     ORDER BY u.id DESC
   `;
 
   db.query(q, (err, rows) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ error: err });
-    }
+    if (err) return res.status(500).json(err);
     res.json(rows);
   });
 });
-
 module.exports = router;
