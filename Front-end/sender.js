@@ -29,8 +29,36 @@ async function loadShipments() {
     if (s.status === "pending") awaiting++;
     if (s.status === "in_transit") transit++;
     if (s.status === "delivered") delivered++;
-    
+   
+    let rateButton = "";
 
+  if (s.status === "delivered") {
+  rateButton = `
+    <div class="mt-2">
+      <div id="stars-${s.id}">
+        ${[1,2,3,4,5].map(n => `
+          <span
+            onclick="selectRating(${s.id}, ${n})"
+            id="star-${s.id}-${n}"
+            class="cursor-pointer text-gray-400 text-xl">
+            ★
+          </span>
+        `).join("")}
+      </div>
+
+      <input
+        id="comment-${s.id}"
+        placeholder="Optional comment"
+        class="border p-1 mt-1 w-full rounded text-sm" />
+
+      <button
+        onclick="submitRating(${s.id})"
+        class="mt-2 bg-yellow-500 text-white px-3 py-1 rounded">
+        Submit Rating
+      </button>
+    </div>
+  `;
+}
     list.innerHTML += `
       <div class="relative border p-4 rounded mb-4">
       <button
@@ -42,6 +70,15 @@ async function loadShipments() {
         <p><strong>From:</strong> ${s.pickup_address}</p>
         <p><strong>To:</strong> ${s.dropoff_address}</p>
         <p>Status: ${s.status}</p>
+        ${rateButton}
+
+${s.status === "awaiting_confirmation"
+  ? `<button onclick="confirmDelivery(${s.id})"
+      class="mt-2 bg-green-600 text-white px-2 py-1 rounded">
+      Confirm Delivery
+     </button>`
+  : ""
+}
 
         ${s.courier_email
           ? `
@@ -158,6 +195,59 @@ setInterval(() => {
     loadChat(id);
   });
 }, 3000);
+/* ================================
+   CONFIRM SHIPMENT
+================================ */
+async function confirmDelivery(id) {
+  await fetch(`http://localhost:3000/api/shipments/${id}/confirm`, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token }
+  });
+
+  loadShipments();
+}
+
+
+
+let selectedRatings = {};
+
+function selectRating(id, rating) {
+  selectedRatings[id] = rating;
+
+  for (let i = 1; i <= 5; i++) {
+    const star = document.getElementById(`star-${id}-${i}`);
+    star.classList.remove("text-yellow-400", "text-gray-400");
+    star.classList.add(i <= rating ? "text-yellow-400" : "text-gray-400");
+  }
+}
+
+function submitRating(id) {
+  const rating = selectedRatings[id];
+  if (!rating) {
+    alert("Please select a rating");
+    return;
+  }
+
+  const comment =
+    document.getElementById(`comment-${id}`).value;
+
+  fetch(`http://localhost:3000/api/shipments/${id}/rate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({
+      rating,
+      comment
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.msg);
+    loadShipments();
+  });
+}
 
 /* ================================
    CANCEL SHIPMENT

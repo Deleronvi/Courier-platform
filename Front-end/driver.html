@@ -10,21 +10,47 @@
 <div class="flex min-h-screen">
 
   <!-- SIDEBAR -->
-  <aside class="w-64 bg-green-700 text-white p-6">
-<h2 class="text-xl font-bold mb-6">
-  Courier Dashboard<br>
-  <span class="text-sm font-normal" id="userEmail"></span>
-</h2>
+  <aside class="w-64 bg-slate-800 text-white p-6 min-h-screen flex flex-col">
 
-    <ul class="space-y-4">
-      <li class="font-semibold">My Active Jobs (0)</li>
-      <li>
-        <button onclick="logout()" class="text-red-300">
-          Logout
-        </button>
-      </li>
-    </ul>
-  </aside>
+  <!-- Title -->
+  <h2 class="text-xl font-bold mb-6">
+    Courier Dashboard<br>
+    <span class="text-sm font-normal" id="userEmail"></span>
+  </h2>
+
+  <!-- Navigation -->
+  <ul class="space-y-4">
+
+    <li>
+    <button 
+  id="statusBtn"
+  onclick="toggleOnlineStatus()"
+  class="w-full py-2 rounded font-semibold bg-green-600 hover:bg-green-700">
+  🟢 Go Online
+</button>
+  
+<h2 class="text-xl font-bold mt-6">My Ratings</h2>
+<div id="ratingsBox"></div>
+    </li>
+
+    <li>
+      <a href="driver-history.html"
+         class="inline-block px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">
+         History
+      </a>
+    </li>
+
+  </ul>
+
+  <!-- Logout -->
+  <div class="mt-8">
+    <button onclick="logout()"
+      class="text-red-300 text-sm hover:text-red-500 transition">
+      Logout
+    </button>
+  </div>
+
+</aside>
 
   <!-- MAIN -->
  <main class="flex-1 p-8">

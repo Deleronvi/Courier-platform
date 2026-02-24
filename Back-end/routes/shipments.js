@@ -55,13 +55,28 @@ router.get("/mine", auth, (req, res) => {
 
 /* GET AVAILABLE SHIPMENTS (COURIER) */
 router.get("/available", auth, (req, res) => {
+
   db.query(
-    `SELECT id, pickup_address, dropoff_address, status
-     FROM shipments
-     WHERE status = 'pending'`,
-    (err, rows) => {
+    "SELECT is_online FROM users WHERE id = ?",
+    [req.user.id],
+    (err, result) => {
+
       if (err) return res.status(500).json(err);
-      res.json(rows);
+
+      if (!result[0].is_online) {
+        return res.json([]); // offline drivers see nothing
+      }
+
+      db.query(
+        `SELECT id, pickup_address, dropoff_address, status
+         FROM shipments
+         WHERE status = 'pending'`,
+        (err, rows) => {
+          if (err) return res.status(500).json(err);
+          res.json(rows);
+        }
+      );
+
     }
   );
 });
@@ -69,10 +84,8 @@ router.get("/available", auth, (req, res) => {
 /* ACCEPT SHIPMENT */
 router.post("/:id/accept", auth, (req, res) => {
   db.query(
-    `UPDATE shipments
-     SET courier_id = ?, status = 'in_transit'
-     WHERE id = ? AND status = 'pending'`,
-    [req.user.id, req.params.id],
+  "UPDATE shipments SET status='accepted', courier_id=?, accepted_at=NOW() WHERE id=? AND status='pending'",
+  [req.user.id, req.params.id],
     err => {
       if (err) return res.status(500).json(err);
       res.json({ msg: "Job accepted" });
@@ -85,7 +98,24 @@ router.post("/:id/accept", auth, (req, res) => {
 router.get("/my-jobs", auth, (req, res) => {
   db.query(
     `SELECT * FROM shipments
-     WHERE courier_id = ? AND status = 'in_transit'`,
+     WHERE courier_id = ?
+     AND status IN ('accepted','in_transit','awaiting_confirmation')`,
+    [req.user.id],
+    (err, rows) => {
+      if (err) return res.status(500).json(err);
+      res.json(rows);
+    }
+  );
+});
+
+/* DRIVER DELIVERY HISTORY */
+router.get("/my-history", auth, (req, res) => {
+  db.query(
+    `SELECT *
+     FROM shipments
+     WHERE courier_id = ?
+     AND status = 'delivered'
+     ORDER BY delivered_at DESC`,
     [req.user.id],
     (err, rows) => {
       if (err) return res.status(500).json(err);
@@ -107,6 +137,23 @@ router.post("/:id/cancel", auth, (req, res) => {
   );
 });
 
+/* START DELIVERY */
+router.post("/:id/start", auth, (req, res) => {
+  db.query(
+    `UPDATE shipments
+     SET status='in_transit',
+         in_transit_at=NOW()
+     WHERE id=? 
+       AND courier_id=? 
+       AND status='accepted'`,
+    [req.params.id, req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Shipment in transit" });
+    }
+  );
+});
+
 router.post("/:id/driver-cancel", auth, (req, res) => {
   db.query(
     `UPDATE shipments
@@ -123,16 +170,114 @@ router.post("/:id/driver-cancel", auth, (req, res) => {
 router.post("/:id/deliver", auth, (req, res) => {
   db.query(
     `UPDATE shipments
-     SET status = 'delivered'
-     WHERE id = ?
-       AND courier_id = ?
-       AND status = 'in_transit'`,
+     SET status='awaiting_confirmation'
+     WHERE id=? 
+       AND courier_id=? 
+       AND status='in_transit'`,
     [req.params.id, req.user.id],
     err => {
       if (err) return res.status(500).json(err);
-      res.json({ msg: "Shipment delivered" });
+      res.json({ msg: "Waiting for sender confirmation" });
     }
   );
 });
 
+router.post("/:id/confirm", auth, (req, res) => {
+  db.query(
+    `UPDATE shipments
+     SET status='delivered',
+         delivered_at=NOW()
+     WHERE id=? 
+       AND sender_id=? 
+       AND status='awaiting_confirmation'`,
+    [req.params.id, req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Delivery confirmed" });
+    }
+  );
+});
+
+/* DRIVER GO ONLINE */
+router.post("/go-online", auth, (req, res) => {
+  db.query(
+    "UPDATE users SET is_online = TRUE WHERE id = ?",
+    [req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Now online" });
+    }
+  );
+});
+
+/* DRIVER GO OFFLINE */
+router.post("/go-offline", auth, (req, res) => {
+  db.query(
+    "UPDATE users SET is_online = FALSE WHERE id = ?",
+    [req.user.id],
+    err => {
+      if (err) return res.status(500).json(err);
+      res.json({ msg: "Now offline" });
+    }
+  );
+});
+/* RATE DRIVER */
+router.post("/:id/rate", auth, (req, res) => {
+  const { rating, comment } = req.body;
+
+  if (!rating || rating < 1 || rating > 5)
+    return res.status(400).json({ msg: "Invalid rating" });
+
+  // Get shipment first
+  db.query(
+    "SELECT sender_id, courier_id, status FROM shipments WHERE id=?",
+    [req.params.id],
+    (err, rows) => {
+      if (err) return res.status(500).json(err);
+      if (rows.length === 0) return res.sendStatus(404);
+
+      const shipment = rows[0];
+
+      if (shipment.sender_id !== req.user.id)
+        return res.sendStatus(403);
+
+      if (shipment.status !== "delivered")
+        return res.status(400).json({ msg: "Not delivered yet" });
+
+      db.query(
+        `INSERT INTO ratings 
+         (shipment_id, sender_id, driver_id, rating, comment)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          req.params.id,
+          req.user.id,
+          shipment.courier_id,
+          rating,
+          comment || null
+        ],
+        err => {
+          if (err) return res.status(400).json({ msg: "Already rated" });
+          res.json({ msg: "Rating submitted" });
+        }
+      );
+    }
+  );
+});
+
+/* DRIVER - VIEW MY RATINGS */
+router.get("/my-ratings", auth, (req, res) => {
+  db.query(
+    `SELECT r.rating, r.comment, r.created_at,
+            s.pickup_address, s.dropoff_address
+     FROM ratings r
+     JOIN shipments s ON r.shipment_id = s.id
+     WHERE r.driver_id = ?
+     ORDER BY r.created_at DESC`,
+    [req.user.id],
+    (err, rows) => {
+      if (err) return res.status(500).json(err);
+      res.json(rows);
+    }
+  );
+});
 module.exports = router;

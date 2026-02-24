@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Driver Oversight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<div class="flex min-h-screen">
+
+  <aside class="w-64 bg-gradient-to-b from-indigo-900 to-indigo-700 text-white p-6">
+    <h2 class="text-2xl font-bold mb-8">Control Center</h2>
+    <ul class="space-y-4 text-sm">
+      <li><a href="admin.html">Dashboard</a></li>
+      <li><a href="admin-drivers.html">Drivers</a></li>
+      <li><a href="admin-shipments.html">Shipments</a></li>
+    </ul>
+  </aside>
+
+  <main class="flex-1 p-10">
+    <h1 class="text-3xl font-bold mb-8">Driver Performance</h1>
+
+    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+  <tr class="text-left border-b text-sm text-gray-600">
+    <th>Email</th>
+    <th>Deliveries</th>
+    <th>Cancelled</th>
+    <th>Rating</th>
+    <th>Online</th>
+    <th>Status</th>
+    <th>Action</th>
+  </tr>
+</thead>
+        <tbody id="driversTable"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script src="admin-drivers.js"></script>
+</body>
+</html>
