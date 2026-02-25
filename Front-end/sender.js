@@ -1,3 +1,8 @@
+const socket = io("http://localhost:3000");
+socket.on("shipmentUpdated", () => {
+  console.log("Update received");
+  loadShipments();
+});
 const token = localStorage.getItem("token");
 const email = localStorage.getItem("email");
 let hidden = JSON.parse(localStorage.getItem("hiddenShipments")) || [];

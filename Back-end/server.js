@@ -29,6 +29,21 @@ app.use("/api/shipments", shipmentRoutes);
 
 
 const PORT = 3000;
-app.listen(PORT, () => {
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+
+app.set("io", io); // allows routes to access io
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+});
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

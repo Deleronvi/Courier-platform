@@ -44,6 +44,8 @@ router.post("/", auth, (req, res) => {
      VALUES (?, ?, ?, ?)`,
     [req.user.id, pickup_address, dropoff_address, receiver_info],
     err => {
+      const io = req.app.get("io");
+  io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Shipment created" });
     }
@@ -101,6 +103,8 @@ router.post("/:id/accept", auth, (req, res) => {
   "UPDATE shipments SET status='accepted', courier_id=?, accepted_at=NOW() WHERE id=? AND status='pending'",
   [req.user.id, req.params.id],
     err => {
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Job accepted" });
     }
@@ -145,6 +149,8 @@ router.post("/:id/cancel", auth, (req, res) => {
      WHERE id=? AND sender_id=? AND status='pending'`,
     [req.params.id, req.user.id],
     err => {
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Cancelled" });
     }
@@ -162,6 +168,8 @@ router.post("/:id/start", auth, (req, res) => {
        AND status='accepted'`,
     [req.params.id, req.user.id],
     err => {
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Shipment in transit" });
     }
@@ -175,6 +183,8 @@ router.post("/:id/driver-cancel", auth, (req, res) => {
      WHERE id=? AND courier_id=?`,
     [req.params.id, req.user.id],
     err => {
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Job cancelled" });
     }
@@ -190,6 +200,9 @@ router.post("/:id/deliver", auth, (req, res) => {
        AND status='in_transit'`,
     [req.params.id, req.user.id],
     err => {
+
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Waiting for sender confirmation" });
     }
@@ -206,6 +219,8 @@ router.post("/:id/confirm", auth, (req, res) => {
        AND status='awaiting_confirmation'`,
     [req.params.id, req.user.id],
     err => {
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Delivery confirmed" });
     }
@@ -218,6 +233,9 @@ router.post("/go-online", auth, (req, res) => {
     "UPDATE users SET is_online = TRUE WHERE id = ?",
     [req.user.id],
     err => {
+
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Now online" });
     }
@@ -230,6 +248,9 @@ router.post("/go-offline", auth, (req, res) => {
     "UPDATE users SET is_online = FALSE WHERE id = ?",
     [req.user.id],
     err => {
+
+      const io = req.app.get("io");
+io.emit("shipmentUpdated");
       if (err) return res.status(500).json(err);
       res.json({ msg: "Now offline" });
     }
@@ -238,7 +259,8 @@ router.post("/go-offline", auth, (req, res) => {
 /* RATE DRIVER */
 router.post("/:id/rate", auth, (req, res) => {
   const { rating, comment } = req.body;
-
+const io = req.app.get("io");
+io.emit("shipmentUpdated");
   if (!rating || rating < 1 || rating > 5)
     return res.status(400).json({ msg: "Invalid rating" });
 

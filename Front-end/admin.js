@@ -1,5 +1,14 @@
+const socket = io("http://localhost:3000");
+  socket.on("shipmentUpdated", () => {
+  console.log("Shipment update received (driver)");
+
+  loadDashboard();
+});
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
+
+let statusChartInstance;
+let dayChartInstance;
 
 if (!token || role !== "admin") location.href = "index.html";
 
@@ -33,32 +42,48 @@ async function loadDashboard() {
     const report = await reportRes.json();
 
     /* ---------- STATUS CHART ---------- */
-    if (report.byStatus && report.byStatus.length) {
-      new Chart(document.getElementById("statusChart"), {
-        type: "bar",
-        data: {
-          labels: report.byStatus.map(r => r.status),
-          datasets: [{
-            label: "Shipments",
-            data: report.byStatus.map(r => r.count)
-          }]
-        }
-      });
+if (report.byStatus && report.byStatus.length) {
+
+  if (statusChartInstance) {
+    statusChartInstance.destroy();
+  }
+
+  statusChartInstance = new Chart(
+    document.getElementById("statusChart"),
+    {
+      type: "bar",
+      data: {
+        labels: report.byStatus.map(r => r.status),
+        datasets: [{
+          label: "Shipments",
+          data: report.byStatus.map(r => r.count)
+        }]
+      }
     }
+  );
+}
 
     /* ---------- DAY CHART ---------- */
-    if (report.byDay && report.byDay.length) {
-      new Chart(document.getElementById("dayChart"), {
-        type: "line",
-        data: {
-          labels: report.byDay.map(r => r.day),
-          datasets: [{
-            label: "Shipments",
-            data: report.byDay.map(r => r.count)
-          }]
-        }
-      });
+if (report.byDay && report.byDay.length) {
+
+  if (dayChartInstance) {
+    dayChartInstance.destroy();
+  }
+
+  dayChartInstance = new Chart(
+    document.getElementById("dayChart"),
+    {
+      type: "line",
+      data: {
+        labels: report.byDay.map(r => r.day),
+        datasets: [{
+          label: "Shipments",
+          data: report.byDay.map(r => r.count)
+        }]
+      }
     }
+  );
+}
 
   } catch (err) {
     console.error("Dashboard error:", err);

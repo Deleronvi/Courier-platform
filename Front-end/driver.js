@@ -1,3 +1,10 @@
+const socket = io("http://localhost:3000");
+ socket.on("shipmentUpdated", () => {
+  console.log("Shipment update received (driver)");
+
+  loadJobs();
+  loadActiveJobs();
+});
 const token = localStorage.getItem("token");
 const email = localStorage.getItem("email");
 
