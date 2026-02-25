@@ -46,6 +46,10 @@ router.post("/", auth, (req, res) => {
     err => {
       const io = req.app.get("io");
   io.emit("shipmentUpdated");
+
+  io.to("drivers").emit("newShipment", {
+    message: "🚚 New delivery request available"
+  });
       if (err) return res.status(500).json(err);
       res.json({ msg: "Shipment created" });
     }

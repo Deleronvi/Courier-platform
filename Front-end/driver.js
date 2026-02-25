@@ -1,10 +1,23 @@
 const socket = io("http://localhost:3000");
+socket.emit("joinDriverRoom");
+
+socket.on("newShipment", (data) => {
+  showNotification(data.message);
+  const sound = document.getElementById("notifSound");
+  if (sound) {
+    sound.play().catch(() => {});
+  }
+});
+
  socket.on("shipmentUpdated", () => {
   console.log("Shipment update received (driver)");
 
   loadJobs();
   loadActiveJobs();
 });
+
+
+
 const token = localStorage.getItem("token");
 const email = localStorage.getItem("email");
 
@@ -15,6 +28,20 @@ document.getElementById("userEmail").textContent = email;
 const availableBox = document.getElementById("availableJobs");
 const activeBox = document.getElementById("activeJobs");
 const title = document.getElementById("availableTitle");
+
+function showNotification(message) {
+  const div = document.createElement("div");
+  div.className =
+    "fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50";
+
+  div.textContent = message;
+
+  document.body.appendChild(div);
+
+  setTimeout(() => {
+    div.remove();
+  }, 4000);
+}
 
 let isOnline = false;
 

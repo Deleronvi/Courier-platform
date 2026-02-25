@@ -42,6 +42,11 @@ app.set("io", io); // allows routes to access io
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+
+  socket.on("joinDriverRoom", () => {
+    socket.join("drivers");
+    console.log("Driver joined drivers room");
+  });
 });
 
 server.listen(PORT, () => {
